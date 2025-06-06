@@ -1,0 +1,41 @@
+function [CancellingSignalSample] = EstimateCancelingSignal(RecordedNoise, ...
+    FilterOrder)
+
+% Define Filter Weight
+Filter_weight = zeros(0,FilterOrder, "double");
+
+% Define Cancelling Signal
+num_sample = length(RecordedNoise)
+cancellingSignal = zeros(0,num_sample, "double");
+
+% Padding signal to avoid exception
+padding_samples = zeros(FilterOrder, "double");
+cancellingSignal = [padding_samples, cancellingSignal, padding_samples]
+
+% Define filter learning rate
+learning_rate = 0.5
+
+% Traveling throw samples and calculate cancelling signal (secondary signal)
+for n = 1:num_sample
+
+    % Noise signal vector 
+    x_n = flip(RecordedNoise(n:n+FilterOrder));
+    % Estimate secondary signal
+    cancellingSignal(n)= Filter_weight * x_n'
+
+    % Estimate filtered signal vector = impulse response of 2nd path
+    % estimation filter *convo ref signal vector
+    % Since this is a FIR -> Impulse response ~ Weight
+    impulse_response_FIR = Filter_weight
+    x_n_filtered = convo(impulse_response_FIR,x_n)
+
+    % Estimate residual noise
+    e_n = RecordedNoise - cancellingSignal(n)
+
+    % Update filter weight = Old weight + learning rate x Error x filtered
+    % ref signal vector
+    Filter_weight = Filter_weight + learning_rate * e_n * x_n_filtered
+end
+
+CancellingSignalSample = cancellingSignal;
+end
