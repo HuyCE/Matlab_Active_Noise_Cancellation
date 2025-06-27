@@ -36,17 +36,17 @@ plot_numberOfSampler = linspace(0,length(y_renoise)/Fs_noise, length(y_renoise))
 %% SETUP FILTER
 
 % Adaptive filter setup
-L_order = 1024; % filter order 
+L_order = 128; % filter order 
 LMS_W = zeros(1,L_order); % Filter Coeficients
-mu = 0.0003; %
+mu = 0.001; %
 
 % primary path model 
-OL_order = 512;
+OL_order = 256;
 of_low_pass = 6000; % 6kHz
 of_high_pass = 20000; % 20kHz
 of_sampling = 44100; % speaker sample rate
 O_f = fir1(OL_order, [(of_low_pass/of_sampling/2) (of_high_pass/of_sampling/2)], 'bandpass'); % define filter model
-O_f = O_f /norm(O_f);
+O_f = O_f
 of_delay = 5; %delay 5 sample
 O_f = [zeros(1,of_delay), O_f];
 
@@ -58,7 +58,6 @@ f_low_pass = 6000; % 6kHz
 f_high_pass = 20000; % 20kHz
 f_sampling = 44100; % speaker sample rate
 S_f = fir1(SL_order, [(f_low_pass/f_sampling/2) (f_high_pass/f_sampling/2)], 'bandpass'); % define filter model
-S_f = S_f /norm(S_f);
 f_delay = 10; %delay 10 sample
 S_f = [zeros(1,f_delay), S_f];
 
