@@ -17,7 +17,8 @@ clear; close; clc;
 
 %% Experiment
 
-d = filter(ref_mic_response, 1, noise);
+d = filter(primary_path_response, 1, noise);
+% x_quora = filter(est_2nd_path_response,1,noise);
 
 % output
 y = zeros(1,N);
@@ -32,8 +33,8 @@ debug_norm_W = zeros(1, N);
 % loop
 for n=1:N
     % Update x buffer 
-    x_buffer = [d(n) x_buffer(1:end-1)];
-    x_2nd_buffer = [d(n) x_2nd_buffer(1:end-1)];
+    x_buffer = [noise(n) x_buffer(1:end-1)];
+    x_2nd_buffer = [noise(n) x_2nd_buffer(1:end-1)];
 
     
     % Estimate output control signal
@@ -45,7 +46,7 @@ for n=1:N
     
 
     % Estimate residual error 
-    e(n) = noise(n) - y_filtered;
+    e(n) = d(n) + y_filtered;
 
     % Estimate filtered ref signal
     x_filtered = dot(est_2nd_path_response, x_2nd_buffer);
@@ -67,15 +68,15 @@ end
 %% Plot data
 
 figure;
-subplot(4,1,1)
+subplot(5,1,1)
 plot(t, noise);
 
-subplot(4,1,2)
+subplot(5,1,2)
 plot(t, e);
 title("residual error")
 
-subplot(4,1,3)
+subplot(5,1,3)
 plot(t,y)
 
-subplot(4,1,4)
-plot(t,debug_norm_W)
+subplot(5,1,4)
+plot(t,debug_norm_W);

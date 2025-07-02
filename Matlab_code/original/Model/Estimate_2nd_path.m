@@ -5,7 +5,7 @@ function [Pulse_Response, Filter_Order] = Estimate_2nd_path(Secnd_pulse_response
     Filter_Order = 36;
 
 
-    Pulse_Response = Secnd_pulse_response + 0.0001 ; % Add some noise to the true path
+    Pulse_Response = Secnd_pulse_response + Secnd_pulse_response*0.0001 ; % Add some noise to the true path
     Pulse_Response(Pulse_Response < 0.01*max(abs(Pulse_Response))) = 0; % Small values to zero for cleaner plot
     Pulse_Response = Pulse_Response / norm(Pulse_Response); % Normalize
     if length(Pulse_Response) < Filter_Order % lenght of secondary path estimation filter S^z
