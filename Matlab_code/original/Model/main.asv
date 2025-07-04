@@ -35,7 +35,7 @@ true_e = zeros(1,N);
 % figure
 plot_res_fig = figure;
 % loop
-for n=L_order_FxLMS:N-L_order_FxLMS;
+for n=1:N/2
     % Update x buffer 
     x_buffer = [noise(n) x_buffer(1:end-1)];
     x_2nd_buffer = [noise(n) x_2nd_buffer(1:end-1)];
@@ -47,11 +47,13 @@ for n=L_order_FxLMS:N-L_order_FxLMS;
     % Passing control signal throw 2nd path
     y_buffer = [y(n) y_buffer(1:end-1)];
     res = conv(secondary_path_response, y_buffer);
-    y_filtered(n) = res(30);
+      
+
+    y_filtered(n) = res(20);
 
     % Estimate residual error 
-    e(n) = d(n) - y_filtered(n);    
-    true_e(n) = d(n-20) + y_filtered(n);
+    e(n) = d(n) + y_filtered(n);    
+    true_e(n) = d(n) - y_filtered(n);
 
     % Estimate filtered ref signal
     x_filtered = dot(est_2nd_path_response, x_2nd_buffer);
@@ -69,56 +71,10 @@ for n=L_order_FxLMS:N-L_order_FxLMS;
         e(n:end) = NaN; % Mark remaining error samples as NaN
         break; % Exit the loop early
     end
-
-    subplot(5,2,[1 2]);
-    stem(x_buffer);
-    ylim([-5 5]);
-    title("X buffer");
-
-    subplot(5,2,[3 4]);
-    stem(res(10:50));
-    ylim([-5 5]);
-    title("y output");
-
-    subplot(5,2,5);
-    plot(t, e);
-    title("residual error");
-
-    subplot(5,2,6);
-    plot(t,y);
-    title("y after 2nd path");
-
-    subplot(5,2,[7 8]);
-    plot(t,true_e);
-    title("true e signal");
-
-    subplot(5,2,[9 10]);
-    plot(t,debug_norm_W);
-    title('debug norm');
-    pause(0.005)
 end
 
 close(plot_res_fig);
 
 %% Plot data
-% figure;
-% subplot(5,1,1);
-% plot(t,d);
-% title("Primary noise");
-% 
-% subplot(5,1,2);
-% plot(t, e);
-% title("residual error");
-% 
-% subplot(5,1,3);
-% plot(t,y);
-% title("y after 2nd path");
-% 
-% subplot(5,1,4);
-% plot(t,true_e);
-% title("true e signal");
-% 
-% subplot(5,1,5);
-% plot(t,debug_norm_W);
-% title('debug norm');
+
 

@@ -2,7 +2,7 @@ function [Pulse_Response, Filter_Order] = ref_mic_filter()
 %UNTITLED2 Summary of this function goes here
 %   Detailed explanation goes here
     % Init
-    Filter_Order = 32;
+    Filter_Order = 24;
     filter_low_pass = 20; % lowest freq
     filter_high_pass = 200; % highest freq
     filter_sample_rate = 1000; % Hz

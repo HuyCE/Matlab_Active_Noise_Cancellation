@@ -2,7 +2,7 @@ function [Pulse_Response, Filter_Order] = Estimate_2nd_path(Secnd_pulse_response
 %UNTITLED5 Summary of this function goes here
 %   Detailed explanation goes here
     % Init
-    Filter_Order = 36;
+    Filter_Order = 24;
 
 
     Pulse_Response = Secnd_pulse_response + Secnd_pulse_response*0.0001 ; % Add some noise to the true path
