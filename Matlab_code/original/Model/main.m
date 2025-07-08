@@ -49,9 +49,11 @@ for n = 1:N
     y_filtered(n) = dot(secondary_path_response, y_buffer);
     % Estimate error 
     e(n) = d(n) - y_filtered(n);
+    % Update e_buffer
+    e_buffer = [e(n) e_buffer(1:end-1)];
 
     MSE_intimeEstimate(n) = mean(e(1:n).^2);
-    Noise_cancellingRate(n) = 10*log10( (mean(d(1:n).^2)/mean(MSE_intimeEstimate(n))) );
+    Noise_cancellingRate(n) = 10*log10( (mean(x_buffer.^2)/mean(e_buffer.^2) ));
     coverageRate(n) = 10*log10(mean(e(1:n).^2));
 
     % Update the LMS weight
@@ -63,32 +65,85 @@ end
 
 
 %% Plot data
-figure;
+close all;
+% figure;
+% 
+% subplot(6,1,1);
+% plot(t,noise);
+% title("Source Noise");
+% hold on;
+% xlabel('Time');
+% ylabel('Altidute');
+% 
+% subplot(6,1,2);
+% plot(t,y_filtered);
+% title("Control signal");
+% hold on;
+% xlabel('Time');
+% ylabel('Altidute');
+% 
+% subplot(6,1,3)
+% plot(t,e);
+% title("error messured");
+% hold on;
+% xlabel('Time');
+% ylabel('Altidute');
+% 
+% subplot(6,1,4);
+% plot(t,debug_norm_W);
+% hold on;
+% title('Adaptive Filter Vector Norm ')
+% xlabel('Time');
+% ylabel('Vector Norm');
+% 
+% subplot(6,1,5);
+% iteration = linspace(1,N,N);
+% plot(iteration, MSE_intimeEstimate);
+% hold on;
+% title('MSE');
+% xlabel('Iteration');
+% ylabel('Error Power(db)');
+% 
+% subplot(6,1,6)
+% plot(t,Noise_cancellingRate);
+% hold on;
+% title("Noise Cancelling Rate");
+% xlabel("Time")
+% ylabel("dB")
 
-subplot(4,1,1);
+de_noise_fig = figure;
 plot(t,noise);
-title("Source Noise");
 hold on;
+title("Recorded Noise signal");
 xlabel('Time');
-ylabel('Altidute');
+ylabel('Amplitude');
 
-subplot(4,1,2);
+signal_fig = figure;
+subplot(3,1,1);
+plot(t,noise);
+hold on;
+title("Recorded Noise signal");
+xlabel('Time');
+ylabel('Amplitude');
+
+subplot(3,1,2); 
 plot(t,y_filtered);
-title("Control signal");
 hold on;
+title('Generated Control Signal');
 xlabel('Time');
-ylabel('Altidute');
+ylabel('Amplitude');
 
-subplot(4,1,3)
+subplot(3,1,3);
 plot(t,e);
-title("error messured");
 hold on;
+title('Error Estimated');
 xlabel('Time');
-ylabel('Altidute');
+ylabel('amplitude');
 
-subplot(4,1,4);
-plot(t,debug_norm_W);
+VecNorm_fig = figure;
+plot(t, debug_norm_W);
 hold on;
+title('Adaptive Filter Vector Norm');
 xlabel('Time');
 ylabel('Vector Norm');
 
@@ -107,4 +162,6 @@ hold on;
 title("Noise Cancelling Rate");
 xlabel("Time")
 ylabel("dB")
+
+%%
 
