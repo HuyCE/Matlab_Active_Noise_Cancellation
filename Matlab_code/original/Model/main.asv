@@ -1,4 +1,4 @@
-clear; clc;
+clear all; clc;close all;
 
 % Noise generate 
 [noise, N, t] = Noise_generator();
@@ -26,8 +26,13 @@ y_buffer = zeros(1, sencondary_path_order);
 % Setup output storages
 y = zeros(1,N);
 y_filtered = zeros(1,N);
-e = zeros(n);
+e = zeros(1,N);
+debug_norm_W = zeros(1,N);
+ref_signal_with_feedback = noise;
+MSE_intimeEstimate = zeros(1,N);
+Noise_cancellingRate = zeros(1,N);
 
+% what if I combine output with the ref input 
 
 for n = 1:N
     % Update x_buffers
@@ -41,32 +46,25 @@ for n = 1:N
 
     % Passing control signal y(n) through 2nd path
     y_filtered(n) = dot(secondary_path_response, y_buffer);
-
     % Estimate error 
-    e(n) = d(n) + y_filtered(n);
-
+    e(n) = d(n) - y_filtered(n);
+    MSE_intimeEstimate(n) = mean(e(1:n).^2);
+    Noise_cancellingRate(n) = 10*log10( (mean(d(1:n).^2)/mean(MSE_intimeEstimate(n))) );
+    
     % Update the LMS weight
     W_FxLMS = W_FxLMS + mu_FxLMS * e(n) * x_buffer;
+    debug_norm_W(n) = norm(W_FxLMS);
+
 end
 
+
+
+%% Plot data
 figure;
-% subplot(5,2,[1 2]);
-% stem(x_buffer);
-% ylim([-5 5]);
-% title("X buffer");
-% 
-% subplot(5,2,[3 4]);
-% stem(res(10:50));
-% ylim([-5 5]);
-% title("y output");
 
 subplot(5,1,1);
 plot(t,noise);
 title("Noise");
-
-subplot(5,1,2);
-plot(t, d);
-title("Primary noise");
 
 subplot(5,1,3);
 plot(t,y);
@@ -80,29 +78,12 @@ subplot(5,1,5);
 plot(t,debug_norm_W);
 title('debug norm');
 
+MSE_fig = figure;
+title('MSE');
+plot(t, MSE_intimeEstimate);
 
-
-
-
-%% Plot data
-% figure;
-% subplot(5,1,1);
-% plot(t,d);
-% title("Primary noise");
-% 
-% subplot(5,1,2);
-% plot(t, e);
-% title("residual error");
-% 
-% subplot(5,1,3);
-% plot(t,y);
-% title("y after 2nd path");
-% 
-% subplot(5,1,4);
-% plot(t,true_e);
-% title("true e signal");
-% 
-% subplot(5,1,5);
-% plot(t,debug_norm_W);
-% title('debug norm');
-
+NSR_fig = figure;
+title(NSE)
+plot(t,Noise_cancellingRate);
+xlabel("Time")
+ylabel("dB")

@@ -1,4 +1,4 @@
-clear; clc;
+clear all; clc;close all;
 
 % Noise generate 
 [noise, N, t] = Noise_generator();
@@ -22,13 +22,18 @@ d = filter(primary_path_response,1 , noise); % Pre-run primary path filter
 % Define buffers
 x_buffer = zeros(1,L_order_FxLMS);
 y_buffer = zeros(1, sencondary_path_order);
-
+e_buffer = zeros(1,L_order_FxLMS);
 % Setup output storages
 y = zeros(1,N);
 y_filtered = zeros(1,N);
 e = zeros(1,N);
 debug_norm_W = zeros(1,N);
+ref_signal_with_feedback = noise;
+MSE_intimeEstimate = zeros(1,N);
+Noise_cancellingRate = zeros(1,N);
+coverageRate = zeros(1,N);
 
+% what if I combine output with the ref input 
 
 for n = 1:N
     % Update x_buffers
@@ -42,13 +47,16 @@ for n = 1:N
 
     % Passing control signal y(n) through 2nd path
     y_filtered(n) = dot(secondary_path_response, y_buffer);
-
     % Estimate error 
     e(n) = d(n) - y_filtered(n);
 
+    MSE_intimeEstimate(n) = mean(e(1:n).^2);
+    Noise_cancellingRate(n) = 10*log10( (mean(d(1:n).^2)/mean(MSE_intimeEstimate(n))) );
+    coverageRate(n) = 10*log10(mean(e(1:n).^2));
+
     % Update the LMS weight
     W_FxLMS = W_FxLMS + mu_FxLMS * e(n) * x_buffer;
-    debug_norm_W(n) = norm(W_FxLMS);
+    debug_norm_W(n) = vecnorm(W_FxLMS,2,2);
 
 end
 
@@ -57,22 +65,46 @@ end
 %% Plot data
 figure;
 
-subplot(5,1,1);
+subplot(4,1,1);
 plot(t,noise);
-title("Noise");
+title("Source Noise");
+hold on;
+xlabel('Time');
+ylabel('Altidute');
 
-subplot(5,1,2);
-plot(t, d);
-title("Primary noise");
-
-subplot(5,1,3);
-plot(t,y);
+subplot(4,1,2);
+plot(t,y_filtered);
 title("Control signal");
+hold on;
+xlabel('Time');
+ylabel('Altidute');
 
-subplot(5,1,4)
+subplot(4,1,3)
 plot(t,e);
 title("error messured");
+hold on;
+xlabel('Time');
+ylabel('Altidute');
 
-subplot(5,1,5);
+subplot(4,1,4);
 plot(t,debug_norm_W);
-title('debug norm');
+hold on;
+xlabel('Time');
+ylabel('Vector Norm');
+
+
+MSE_fig = figure;
+iteration = linspace(1,N,N);
+plot(iteration, MSE_intimeEstimate);
+hold on;
+title('MSE');
+xlabel('Iteration');
+ylabel('Error Power(db)');
+
+NSR_fig = figure;
+plot(t,Noise_cancellingRate);
+hold on;
+title("Noise Cancelling Rate");
+xlabel("Time")
+ylabel("dB")
+
